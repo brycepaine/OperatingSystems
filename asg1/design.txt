@@ -1,0 +1,68 @@
+Purpose:
+This document specifies the design of a shell program.
+
+Assumptions:
+1. The program will be on a minix operating system.
+
+2. The user will have knowledge of basic commands and system calls.
+
+Data:
+1.	args - the arguments from the command line
+	- represented as a array of strings which hold the input
+
+2. 	shell_line – customize symbol for shell output
+
+3.	cmd – string which holds the command to be executed
+	- represented as a char *
+
+4.	input file/ ouput file – files for writing to or reading from
+	- either open an existing file and overwrite or make a new file
+
+
+Functions:
+1. 	main()
+	- Description: a function which gets arguments from command line and calls do_cmd
+	- Input: nothing
+	- Output: nothing
+	- result: starts and finishes program
+
+2.	do_cmd(args)
+	- Description: executes the commands handling input/output, piping, forking, and the execvp() 
+      function call
+	-Input: passed the arguments from command line
+	-Output: none
+	- Result: does all commands and prints the desired ouput to console
+
+3.	pipe_inf(char *cmd1, char *cmd2, char **args, char **args2)
+	-  Description: handles the piping of commands (“|”) and infinite piping if present
+	-  Input: the commands to be executed and character strings which hold the arguments needed 	   	   
+        for execution
+	- Ouput: nothing
+	- result: the commands output becomes input for piped command and so on..
+
+
+Algorithms:
+
+myshell algorithm:
+1. Pull all arguments from command line
+
+2. call do_cmd to perform commands
+3. end program
+
+do_cmd algorithm
+1. check if redirecting/or in-directing and open files if necessary
+
+2. check if piping call pipe_inf function
+
+3. fork and execute commanding redirecting if necessary
+
+pipe_inf algorithm
+1. fork
+
+2. manipulate file descriptors
+
+3. check for second pipe:
+	-if there isn't one->finish
+	-if there is one use recursion to handle
+
+4. exit

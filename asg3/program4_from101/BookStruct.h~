@@ -1,0 +1,5 @@
+
+
+bookPtr newBookStruct(char *title);
+
+char* getTitle(bookPtr B)

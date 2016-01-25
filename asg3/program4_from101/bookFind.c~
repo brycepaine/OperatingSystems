@@ -1,0 +1,107 @@
+/*Taoh Green (tmgreen@ucsc.edu)
+ *Sam Fields (sefields@ucsc.edu)
+ *NAME: bookFind.c
+ *DESCRIPTION: creates two arrays of numbers by reading them
+    from a text file. It then passes these arrays to a heapsort 
+    and insertionSort algorithm, which returns the same array but in
+    sorted order. It then prints the sorted arrays.
+ */
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#include "hashset.h"
+
+
+int main(int argc, char **argv) {
+
+	//The first argument is the library file.
+    FILE *file = fopen(argv[1], "r");
+    if(file==NULL) {
+        printf("Need to give program two input files.\n");
+        return EXIT_FAILURE;
+    }
+    char str[300];
+    int numBooks;
+    int hashSize;
+    double testIn;
+    if(fgets(str,300,file) != NULL) {
+		// scan in the number of books and hashsize
+		// testIn is a variable to make sure there are no extra arguments given on
+		// the first lin (i.e. bad input)
+        int test = sscanf (str, "%d%d%lg", &numBooks, &hashSize, &testIn);
+		// only two things should have been scanned
+		// if there are more the file is wrong and program ends
+        if(test!=2) {
+            fprintf(stderr, "bad input\n");
+            return EXIT_FAILURE;
+        }
+    }
+    
+    hashset *H = new_hashset(hashSize);
+    
+	
+	void remChar(char* str) {
+		char *newLine = strchr(str, '\n');
+        char *carriageRet = strchr(str, '\r');
+		if(newLine !=NULL) {
+			*newLine = '\0';
+		}
+        if(carriageRet != NULL) {
+            *carriageRet = '\0';
+        }
+	}
+
+    for (int i = 0; i < numBooks; ++i) {
+        int libId;
+        char *scanned;
+
+        char newStr[300];
+		if(fgets(newStr,300,file) != NULL) {
+			remChar(newStr);
+            scanned = strtok(newStr, ", ");
+        }
+		sscanf(scanned, "%d", &libId);
+		scanned = strtok(NULL,"");
+		++scanned;
+		put_hashset(H, scanned, libId);
+    }
+    fclose(file);
+	
+    FILE *secFile = fopen(argv[2], "r");
+	if(secFile==NULL) {
+        printf("Need to give program two input files.\n");
+        return EXIT_FAILURE;
+    }
+	
+	int numReq;
+
+	 if(fgets(str,300,secFile) != NULL) {
+		int test = sscanf(str, "%d%lg", &numReq, &testIn);
+		if(test!=1) {
+            fprintf(stderr, "bad input\n");
+            return EXIT_FAILURE;
+        }
+	}
+
+	for (int i = 0; i < numReq; ++i) {
+        char str2[300];
+
+		if(fgets(str2,300,secFile) != NULL) {
+			remChar(str2);
+			// printf("%s\n", str2);
+			has_hashset(H, str2);
+		}
+	}
+   
+	fclose(secFile);
+    free_hashset(H);
+
+    return EXIT_SUCCESS;
+}
+
+
+
+

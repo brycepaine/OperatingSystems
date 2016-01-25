@@ -1,0 +1,33 @@
+// Sam Fields (sefields@ucsc.edu) and Taoh Green (tmgreen@ucsc.edu)
+// 
+#ifndef __HASHSET_H__
+#define __HASHSET_H__
+
+#include <stdbool.h>
+
+typedef struct hashset hashset;
+
+//
+// Create a new hashset with a default number of elements.
+//
+hashset *new_hashset (int size);
+
+//
+// Frees the hashset, and the words it points at.
+//
+void free_hashset (hashset* H);
+
+//
+// Inserts a new string into the hashset.
+//
+void put_hashset (hashset* H, char *title, int id);
+
+//
+// Looks up the string in the hashset and returns true if found,
+// false if not found.
+//
+void has_hashset (hashset* H, char* title);
+
+void print_hashset(hashset* H);
+#endif
+

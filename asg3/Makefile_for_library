@@ -1,0 +1,7 @@
+all: library
+
+library: library.o
+	gcc -ansi -Wall -Wextra -std=gnu99 -o library library.o
+	
+clean:
+	rm library.o library library_test

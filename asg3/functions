@@ -1,0 +1,63 @@
+/* 
+	Group: Taoh Green, Bryce Paine, Mariette Souppe
+	CS 111 - Operating Systems
+	Assignment 3 - Key Value Store and Server
+	February 27, 2015
+*/
+
+/* Create or open a file that will contain hash table 
+	file 	= value / word/ key
+	length 	= length of the entry
+	size 	= table size
+*/
+int initialize(char *file, int length, int size) {
+	File *fd;
+	if ((fd = fopen(file, "r")) != NULL) {
+		
+		
+		
+	} else {
+		return -1;
+	}
+}
+
+/*
+
+*/
+int insert(char *key, void *value, int length)
+
+int fetch(char *key, void *value, int *length)
+
+int probe(char *key)
+
+int delete(char *key)
+
+/* Operations */
+1. off_t lseek(int fildes, off_t offset, int whence)
+	- Description: Used to change the location of the read/write pointer of a 
+	               file descriptor. The location can be set either in absolute 
+				   or relative terms.
+	- Input: 
+			fildes - The file descriptor of the pointer that is going to be moved.
+			offset - The offset of the pointer (measured in bytes).
+			whence - The method in which the offset is to be interpreted 
+			         (relative, absolute, etc.). Legal values for this variable 
+					 are provided at the end.
+					 Available values for whence - 
+						SEEK_SET	Offset is to be measured in absolute terms.
+						SEEK_CUR	Offset is to be measured relative to the current location of the pointer.
+						SEEK_END	Offset is to be measured relative to the end of the file.
+					 
+	- Output: Returns the offset of the pointer (in bytes) from the beginning 
+			  of the file. If the return value is -1, then there was an error 
+			  moving the pointer.
+
+2. char *fgets(char *str, int n, FILE *stream)
+
+3. int posix_fallocate(int fd, off_t offset, off_t len)
+	- Description: Allocates file space
+	- Input:
+			fd - disk space is allocated for the file referred to by the descriptor fd
+			offset - the bytes in the range starting at offset
+			len - continuing for len bytes	
+	- Output: Returns zero on success, or an error number on failure

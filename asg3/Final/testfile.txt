@@ -1,0 +1,12 @@
+INIT <name>file<name><length>12345<length><size>5<size>
+PUT <key>test</key><value>wwereres</value>
+PUT <key>1</key><value>taoh</value>
+PUT <key>2</key><value>mariette</value>
+GET <key>yoyo</key>
+PUT <key>3</key><value>souppe</value>
+PUT <key>4</key><value>bryce</value>
+PUT <key>5</key><value>paine</value>
+GET <key>5</key>
+DEL <key>2</key>
+PUT <key>5</key><value>paine</value>
+GET <key>5</key>

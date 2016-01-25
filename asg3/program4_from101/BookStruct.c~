@@ -1,0 +1,21 @@
+
+#include "bookStruct.h"
+#include "List.h"
+
+typedef struct bookStruct *bookPtr;
+
+typedef struct bookStruct{
+   ListHndl libraries;
+   char *title;
+} bookStruct;
+
+bookPtr newBookStruct(char *title) {
+   bookPtr new = malloc(sizeof(bookStruct));
+   new -> title = title;
+   new -> libraries = NULL;
+   return new;
+}
+
+char* getTitle(bookPtr B) {
+   return B->title;
+}

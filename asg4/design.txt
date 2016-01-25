@@ -1,0 +1,331 @@
+Owner: Taoh Green, Bryce Paine, Mariette Souppe
+Class: CMPS 111 Operating Systems
+Assignment 4
+March 16, 2015
+File: design.txt
+
+Purpose:
+This documents specifies the single instance storage server, created with the use of deduplication.
+Files are broken into blocks and stored into a hash table.  
+
+Assumptions:
+1. The program will be ran on UNIX
+2. The user will know how to execute the program
+
+Data Library:
+1. _size
+	- global size passed in by Initialize to specify number of slots 
+	in hash table
+
+2. _length
+	- global length passed in by Initialize to specify the length of each
+	slot in hash table
+
+3. fd 
+	-global file descriptor passed in by Initialize to specify file
+
+4. magic_num
+	-the magic number is inserted at the beginning of each slot in the hashtable
+	it is used to tell whether the slot is full or empty
+
+5.tombstone
+	-when we delete a key/value, we need a tombstone to tell an item was deleted.
+	we use this to keep searching through the hash table for a key until an empty
+	spot is found.  For insert, if we find an empty spot without a key match, we insert
+	the key into the slot where tombstone is. Without a tombstone, we would encounter 
+	problems with keys not being found when they are indeed in the table and to avoid
+	duplicate key inserts.
+
+6. hashkey
+	-this takes the hash of a key and mods it by size.  This will give us a slot that 
+	is inside the table
+
+7.check_key
+	-read in the key into check key.  if strcmp is 0, then there is a key match in the hash table
+
+8.check
+	-reads in the first 4 bytes where the magic number is, it is then compared with check_dead/check_tomb
+
+9.check_dead
+	-we do memcmp with check.  if it is 0 then we know the magic number is in current slot
+
+10.check_tomb
+	-we do memcmp with check.  if it is 0 then we know the tombstone is in current slot
+
+11.prober
+	-hahskey found from probe, if -1 then key/value not in table
+
+Data Server/materialize/ingest:
+1. listenfd
+	- Value for the listen file descriptor
+
+2. connfd
+	- Value for the connection file descriptor for connected socket
+
+3. n
+	- Checks the status of the read() and write() functions
+
+4. line[MAXLINE+1], printAll[MAXLINE+1], and recvline[MAXLINE+1]
+	- Stores data to be sent or received between the hosts
+
+5. AF_INET
+	- Specifies the communication protocol used
+
+6. SOCK_STREAM
+	- Specifies the type of socket
+
+7. sockaddr
+	- Socket address structures to cast pointers
+
+8. servaddr
+	- Stores the server address
+
+9. sockfd
+	- Socket file descriptor returned from a previous socket()
+
+10. logfile
+	-when hashtable is created, ptr points to value in logfile
+	
+11. hashtable
+	-initialized to size of 2000 with block length 100
+	
+12. md5key
+	-block is md5'd resulting in 128 bit encrypted key
+
+13. fdin
+	-read in original file
+
+14. fdout
+	-output file for recipe
+
+15. filepath
+	-obtaining path of file
+
+16. recipe
+	-contains block length, size, location, file name, and md5keys
+
+Functions:
+1. int socket(int domain, int type, int protocol)
+	- Description: Create an endpoint for communication
+	- Input: domain, type, protocol
+	- Output: On success a file descriptor for the new socket, -1 error
+	- Result: Allows a communication to be built
+
+2. int bind(int sockfd, const struct sockaddr  *my_addr, socklen_t addrlen)
+	- Description: Bind a name to a socket
+	- Input: sockfd, my_addr, addrlen
+	- Output: 0 on success, -1 on error
+	- Result: Gives the socket a local address
+
+3. int listen(int sockfd, int backlog)
+	- Description: Listen for connections on a socket
+	- Input: sockfd, backlog
+	- Output: Return 0 on success, -1 on error
+	- Result: Checks for available connections
+
+4. int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+	- Description: Accept a connection on a socket
+	- Input: sockfd, addr, addrlen
+	- Output: Return non-negative integer on success, -1 on error
+	- Result: Accepts the connect from the host
+	
+5. ssize_t read(int fd, void *buf, size_t count)
+	- Description: Read from a file descriptor
+	- Input: fd, buf, count
+	- Output: # of bytes read and file position
+	- Result: Reads the data it's being sent
+	
+6. ssize_t write(int fd, const void *buf, size_t count);
+	- Description: Write to a file descriptor
+	- Input: fd, buf, count
+	- Output: On success returns # of bytes, returns -1 on error
+	- Result: Writes data to other host
+	
+7. int close(int fildes)
+	- Description: Close a file descriptor
+	- Input: fildes
+	- Output: Return 0 on success, return -1 on error
+	- Result: Closes the socket after host wants to shut down
+	
+8. char *strncat(char *dest, const char *src, size_t n) 
+	- Description: Concatenate two strings
+	- Input: dest, src, n
+	- Output: Returns a pointer to the resulting string dest
+	- Result: Combines strings together
+	
+9.  int inet_pton(int af, const char *src, void *dst)
+	-Description: Convert IPv4 and IPv6 addresses from text to binary form
+	- Input: af, src, dest
+	- Output: Returns 1 on success, 0 is returned if src does not contain 
+	          a character string representing a valid network address in 
+			  the specified address family. If af does not contain a valid 
+			  address family, -1 is returned.
+10.fd = open(const char *path, int oflags, mode_t mode)
+	- Description: returns file descriptor given a pathname
+	- Input: path, flag, mode
+	- Output: file descriptor, -1 if error
+
+11.lseek(int fd, off_t offset, int whence)
+	- Description: repositions the offset of the open file
+	- Input: file descriptor, offset, whence
+	- Result: repostions offset of file
+
+12.memcmp(const void *s1, const void *s2, size_t n)
+	- Description: compares first n bytes of memory of s1 s2
+	- Input: s1, s2, n
+	- Output: 0 if equal, >0 if s1 is larger, <0 if s1 is smaller
+
+13.strcmp(const char *s1, const char *s2)
+	- Description: compares two strings s1 s2
+	- Input: s1 s2
+	- Output:0 if equal, >0 if s1 is larger, <0 if s1 is smaller
+	
+14. strcmp(recvline, "INSERT") == 0
+	-checks to see if client wants server to insert a key
+	
+15. strtok(parseline, "~")
+	-parses into 3 pieces, separated by a ~.  they are command+md5 key,
+	 block of data, and size of block
+	 
+16. index = lseek(logfile, 0, SEEK_END)
+	-seeks to end of logfile to append data block
+	
+17. insert(p, index, atoi(pieces[2]))
+	-inserts md5 key into hash table
+	
+18. strcmp(recvline, "FETCH") == 0
+	-checks if server wants to fetch value(used in materialize)
+	
+19. fetch(md5key, &byte_offset, &length) == -1
+	-fetched value is not found
+	
+20.strcmp(recvline, "INQUIRY") == 0)
+	-check if probe is needed by client
+	
+21.while((n = fread(buffer, blockSize, 1, fdin)) >= 0) 
+	-converts buffer into md5 key in ingest
+	
+22.sprintf(b, "INSERT %s~%s~%d", keydigest, buffer, strlen(buffer));
+	-sends information to server, telling it to insert data block into hash
+	
+Algorithms:
+initialize:
+1. open , if -1 return error
+2. 	give global size the size passed in
+3.	give global length the length passed in
+4.	return fd
+
+delete:
+1.  probe key and return value (hashkey to delete)
+2.  if prober is -1
+3.  	value not in table, return
+4.  lseek to the value to delete
+5.	write tombstone to show it has been deleted
+6.      return
+
+probe:
+1. hashkey = strhash(key) % _size(slot in hash table)
+2. for
+3.	seek to correct byte in table with hashkey*_length
+4.	read first 4 bytes into check
+5.	memcmp with check_dead and check_tomb (if 0, =)
+6.	read length of key into check_key
+7.	if checkdead(magic number) and key, then key found 
+8.		return hashkey
+9.	elseif magic num matches then increase hashkey to check next slot
+10.	elseif tombstone and key found
+11.			then key has been removed.exit loop
+12.	elseif tombstone found
+13.		increase hashkey
+14.	else return -1 (for empty slot)
+15.return -1(empty slot)
+
+insert:
+1. if global length is less than length+keylen+magic#len
+2. 	error: value too big
+3.
+4. hashkey = strhash(key) % _size(slot in hash table)
+5. for
+6.	seek to correct byte in table with hashkey*_length
+7.	read first 4 bytes into check
+8.	memcmp with check_dead and check_tomb (if 0, =)
+9.	read length of key into check_key
+10.	if checkdead(magic number) and key, then key found 
+11.		return hashkey
+12.  	if check tomb and key
+13.		insert in slot where key was previously deleted
+14.	elseif magic num matches then increase hashkey to check next slot
+15.	else break(slot found)
+16.	if hashkey ==_size
+17.		hashkey=0(loop around)
+18.  if i == _size
+19.	hash table full
+20.  if magic number >= 0
+21.	hashkey = hash_dead
+22. seek to hashkey
+23. write magic num
+24. write key
+25. write length
+26. write value
+27. return hashkey
+28.	
+29.return -1(empty slot)
+
+
+fetch:
+1. probe for hashkey
+2. if probe = -1
+3. 	value not in table
+4. else
+5. 	lseek to probed hashkey*length+size of uint32+strleng(key)
+6.	read length
+7.	read value into buffer
+8.	return prober
+
+Ingest Algorithm:
+create socket
+Operating system initiates TCP three way connections
+read in the original file
+output file for recipe
+obtain stats/path/permission of the file
+while{
+convert buffer into md5 key
+send insert info to server
+send md5 keys out for the recipe
+get server response
+clear buffer
+break out of loop when nothing to read}
+
+Materialize Algorithm:
+create socket
+operating system initiates TCP three way connections
+open recipe file
+parse into 3 pieces
+while line !null{
+fetch value to write
+write it}
+
+Server:
+Create socket
+bind operating system that links port number to process
+listen to operating system to accept connections
+wait for connection
+create table and logfile
+	read information from the client
+	if insert called from client
+		break into 3 pieces
+		append block data into the logfile
+		insert md5 key into hash table
+	if fetch 
+		break into 3 pieces
+		seek to where it is in logfile, reads
+		print block length and length
+	if inquiry/probe
+		break into pieces
+		if data block found, return found
+		else return NOT FOUND
+	else ERROR
+		
+
+
+

@@ -1,0 +1,25 @@
+#Taoh Green (tmgreen@ucsc.edu)
+#Bryce Paine (bpaine@ucsc.edu)
+#Makefile
+
+Listdr : Listdr.o List.o
+	gcc -ansi -Wall -Wextra -std=gnu99 -o Listdr Listdr.o List.o
+
+hashsetdr : hashsetdr.o hashset.o
+	gcc -ansi -Wall -Wextra -std=gnu99 -o hashsetdr hashsetdr.o hashset.o
+
+Listdr.o : List.h Listdr.c
+	gcc -c -ansi -Wall -Wextra -std=gnu99 Listdr.c
+
+List.o : List.h List.c
+	gcc -c -ansi -Wall -Wextra -std=gnu99 List.c
+
+hashsetdr.o : hashset.h hashsetdr.c
+	gcc -c -ansi -Wall -Wextra -std=gnu99 hashsetdr.c
+
+hashset.o : List.h strhash.h bookStruct.h hashset.h hashset.c
+	gcc -c -ansi -Wall -Wextra -std=gnu99 hashset.c
+
+clean :
+	rm Listdr Listdr.o List.o hashset.o hashsetdr.o
+
